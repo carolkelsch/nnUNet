@@ -23,6 +23,7 @@ Per epoch, it stores:
 - `train_losses`, `val_losses`
 - `lrs`
 - `epoch_start_timestamps`, `epoch_end_timestamps`
+- `patience_waiting` the number of epochs it does not increase the `ema_fg_dice` over the thresh
 
 From these values, `progress.png` is updated in the fold output folder.
 On checkpoint save/load, the local logging state is also saved/restored, so curves continue correctly after resume.
