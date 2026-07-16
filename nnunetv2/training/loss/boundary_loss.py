@@ -44,6 +44,9 @@ class BoundaryLoss(nn.Module):
         return loss
 
 class DC_and_CE_and_BD_loss(nn.Module):
+    """
+    Combination of Dice, Cross-entropy and Boundary steering losses.
+    """
     def __init__(self, soft_dice_kwargs, ce_kwargs, weight_ce=1, weight_dice=1, weight_bound=0.01,
         ignore_label=None, dice_class=MemoryEfficientSoftDiceLoss):
 
@@ -87,6 +90,9 @@ class DC_and_CE_and_BD_loss(nn.Module):
         return result
 
 class DC_and_BD_loss(nn.Module):
+    """
+    Combination of Dice and Boundary steering losses.
+    """
     def __init__(self, soft_dice_kwargs, weight_ce=1, weight_dice=1, weight_bound=0.01,
         ignore_label=None, dice_class=MemoryEfficientSoftDiceLoss):
 
