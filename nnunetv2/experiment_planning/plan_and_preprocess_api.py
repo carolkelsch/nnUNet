@@ -52,7 +52,14 @@ def plan_experiment_dataset(dataset_id: int,
                             experiment_planner_class: Type[ExperimentPlanner] = ExperimentPlanner,
                             gpu_memory_target_in_gb: float = None, preprocess_class_name: str = 'DefaultPreprocessor',
                             overwrite_target_spacing: Optional[Tuple[float, ...]] = None,
-                            overwrite_plans_name: Optional[str] = None) -> Tuple[dict, str]:
+                            overwrite_plans_name: Optional[str] = None,
+                            lr: Optional[float] = None,
+                            wdecay: Optional[float] = None,
+                            oversample_percent: Optional[float] = None,
+                            prob_oversampling: Optional[float] = None,
+                            minibatches_per_epoch: Optional[int] = None,
+                            n_val_iterations_per_epoch: Optional[int] = None,
+                            n_epochs: Optional[int] = None) -> Tuple[dict, str]:
     """
     overwrite_target_spacing ONLY applies to 3d_fullres and 3d_cascade fullres!
     """
@@ -61,6 +68,21 @@ def plan_experiment_dataset(dataset_id: int,
         kwargs['plans_name'] = overwrite_plans_name
     if gpu_memory_target_in_gb is not None:
         kwargs['gpu_memory_target_in_gb'] = gpu_memory_target_in_gb
+    
+    if lr is not None:
+        kwargs['lr'] = lr
+    if wdecay is not None:
+        kwargs['wdecay'] = wdecay
+    if oversample_percent is not None:
+        kwargs['oversample_percent'] = oversample_percent
+    if prob_oversampling is not None:
+        kwargs['prob_oversampling'] = prob_oversampling
+    if minibatches_per_epoch is not None:
+        kwargs['minibatches_per_epoch'] = minibatches_per_epoch
+    if n_val_iterations_per_epoch is not None:
+        kwargs['n_val_iterations_per_epoch'] = n_val_iterations_per_epoch
+    if n_epochs  is not None:
+        kwargs['n_epochs'] = n_epochs
 
     planner = experiment_planner_class(dataset_id,
                                        preprocessor_name=preprocess_class_name,
@@ -76,7 +98,14 @@ def plan_experiment_dataset(dataset_id: int,
 def plan_experiments(dataset_ids: List[int], experiment_planner_class_name: str = 'ExperimentPlanner',
                      gpu_memory_target_in_gb: float = None, preprocess_class_name: str = 'DefaultPreprocessor',
                      overwrite_target_spacing: Optional[Tuple[float, ...]] = None,
-                     overwrite_plans_name: Optional[str] = None):
+                     overwrite_plans_name: Optional[str] = None,
+                     lr: Optional[float] = None,
+                     wdecay: Optional[float] = None,
+                     oversample_percent: Optional[float] = None,
+                     prob_oversampling: Optional[bool] = None,
+                     minibatches_per_epoch: Optional[int] = None,
+                     n_val_iterations_per_epoch: Optional[int] = None,
+                     n_epochs: Optional[int] = None):
     """
     overwrite_target_spacing ONLY applies to 3d_fullres and 3d_cascade fullres!
     """
@@ -93,7 +122,10 @@ def plan_experiments(dataset_ids: List[int], experiment_planner_class_name: str 
     for d in dataset_ids:
         _, plans_identifier = plan_experiment_dataset(d, experiment_planner, gpu_memory_target_in_gb,
                                                       preprocess_class_name,
-                                                      overwrite_target_spacing, overwrite_plans_name)
+                                                      overwrite_target_spacing, overwrite_plans_name,
+                                                      lr, wdecay, oversample_percent, prob_oversampling,
+                                                      minibatches_per_epoch, n_val_iterations_per_epoch,
+                                                      n_epochs)
     return plans_identifier
 
 

@@ -118,6 +118,34 @@ class ConfigurationManager(object):
     @property
     def batch_size(self) -> int:
         return self.configuration['batch_size']
+    
+    @property
+    def initial_lr(self) -> int:
+        return self.configuration['initial_lr']
+    
+    @property
+    def weight_decay(self) -> int:
+        return self.configuration['weight_decay']
+    
+    @property
+    def oversample_foreground_percent(self) -> int:
+        return self.configuration['oversample_foreground_percent']
+    
+    @property
+    def probabilistic_oversampling(self) -> int:
+        return self.configuration['probabilistic_oversampling']
+    
+    @property
+    def num_iterations_per_epoch(self) -> int:
+        return self.configuration['num_iterations_per_epoch']
+    
+    @property
+    def num_val_iterations_per_epoch(self) -> int:
+        return self.configuration['num_val_iterations_per_epoch']
+    
+    @property
+    def num_epochs(self) -> int:
+        return self.configuration['num_epochs']
 
     @property
     def patch_size(self) -> List[int]:

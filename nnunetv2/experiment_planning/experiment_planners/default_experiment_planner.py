@@ -26,7 +26,14 @@ class ExperimentPlanner(object):
                  gpu_memory_target_in_gb: float = 8,
                  preprocessor_name: str = 'DefaultPreprocessor', plans_name: str = 'nnUNetPlans',
                  overwrite_target_spacing: Union[List[float], Tuple[float, ...]] = None,
-                 suppress_transpose: bool = False):
+                 suppress_transpose: bool = False,
+                 lr: float = 1e-2,
+                 wdecay: float = 3e-5,
+                 oversample_percent: float = 0.33,
+                 prob_oversampling: bool = False,
+                 minibatches_per_epoch: int = 250,
+                 n_val_iterations_per_epoch: int = 50,
+                 n_epochs: int = 1000):
         """
         overwrite_target_spacing only affects 3d_fullres! (but by extension 3d_lowres which starts with fullres may
         also be affected
@@ -85,6 +92,13 @@ class ExperimentPlanner(object):
         if isfile(join(self.raw_dataset_folder, 'splits_final.json')):
             _maybe_copy_splits_file(join(self.raw_dataset_folder, 'splits_final.json'),
                                     join(preprocessed_folder, 'splits_final.json'))
+        self.lr = lr
+        self.wdecay = wdecay
+        self.oversample_percent = oversample_percent
+        self.prob_oversampling = prob_oversampling
+        self.minibatches_per_epoch = minibatches_per_epoch
+        self.n_val_iterations_per_epoch = n_val_iterations_per_epoch
+        self.n_epochs = n_epochs
 
     def determine_reader_writer(self):
         example_image = self.dataset[self.dataset.keys().__iter__().__next__()]['images'][0]
@@ -387,6 +401,13 @@ class ExperimentPlanner(object):
             'data_identifier': data_identifier,
             'preprocessor_name': self.preprocessor_name,
             'batch_size': batch_size,
+            'initial_lr': self.lr if self.lr is not None else 1e-2,
+            'weight_decay': self.wdecay if self.wdecay is not None else 3e-5,
+            'oversample_foreground_percent': self.oversample_percent if self.oversample_percent is not None else 0.33,
+            'probabilistic_oversampling': self.prob_oversampling if self.prob_oversampling is not None else False,
+            'num_iterations_per_epoch': self.minibatches_per_epoch if self.minibatches_per_epoch is not None else 250,
+            'num_val_iterations_per_epoch': self.n_val_iterations_per_epoch if self.n_val_iterations_per_epoch is not None else 50,
+            'num_epochs': self.n_epochs if self.n_epochs is not None else 1000,
             'patch_size': patch_size,
             'median_image_size_in_voxels': median_shape,
             'spacing': spacing,
