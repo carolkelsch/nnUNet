@@ -1,0 +1,10 @@
+name: nnunet_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - -e .
+prefix: /home/carolinakelsch/miniconda3/envs/nnunet_env

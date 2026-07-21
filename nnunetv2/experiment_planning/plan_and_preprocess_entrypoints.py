@@ -175,6 +175,24 @@ def plan_and_preprocess_entry():
                              "RAM available. Image resampling takes up a lot of RAM. MONITOR RAM USAGE AND "
                              "DECREASE -np IF YOUR RAM FILLS UP TOO MUCH!. Default: 8 processes for 2d, 4 "
                              "for 3d_fullres, 8 for 3d_lowres and 4 for everything else")
+    parser.add_argument('-lr', type=float, default=1e-2, required=False,
+                        help="[OPTIONAL] Initial learning rate. Default: 1e-2")
+    parser.add_argument('-wdecay', type=float, default=3e-5, required=False,
+                        help="[OPTIONAL] Weight decay. Default: 3e-5")
+    parser.add_argument('-oversample_percent', type=float, default=0.33, required=False,
+                        help="[OPTIONAL] Oversample foreground percentage. Default: 0.33")
+    parser.add_argument('-prob_oversampling', required=False, default=False, action='store_true',
+                        help="[OPTIONAL] Set this to use probabilistic oversampling. Default: False")
+    parser.add_argument('-minibatches_per_epoch', type=int, default=250, required=False,
+                        help="[OPTIONAL] Number of cropped samples to use for training in each epoch. Default: 250")
+    parser.add_argument('-n_val_iterations_per_epoch', type=int, default=50, required=False,
+                        help="[OPTIONAL] Number of validation iterations per epoch. Default: 50")
+    parser.add_argument('-n_epochs', type=int, default=1000, required=False,
+                        help="[OPTIONAL] Number of training epochs. Default: 1000")
+    parser.add_argument('--verbose', required=False, action='store_true',
+                        help='Set this to print a lot of stuff. Useful for debugging. Will disable progress bar! '
+                             'Recommended for cluster environments')
+
     _add_logging_args(parser)
     args = parser.parse_args()
 
@@ -186,7 +204,10 @@ def plan_and_preprocess_entry():
     # experiment planning
     print('Experiment planning...')
     plans_identifier = plan_experiments(args.d, args.pl, args.gpu_memory_target, args.preprocessor_name,
-                                        args.overwrite_target_spacing, args.overwrite_plans_name)
+                                        args.overwrite_target_spacing, args.overwrite_plans_name,
+                                        args.lr, args.wdecay, args.oversample_percent, args.prob_oversampling,
+                                        args.minibatches_per_epoch, args.n_val_iterations_per_epoch,
+                                        args.n_epochs)
 
     # manage default np
     if args.np is None:

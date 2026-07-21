@@ -135,6 +135,39 @@ class MetaLogger(object):
             raise RuntimeError("nnU-Net logger environment variable has the wrong value. Must be '0' (disabled) or '1'(enabled).")
 
 
+class MyMetaLogger(MetaLogger):
+    """
+    Variation to handle patience count for early stopping.
+    Changes LocalLogger to MyLocalLogger.
+    """
+
+    def __init__(self, output_folder, resume, verbose: bool = False):
+        """Initialize the meta logger.
+
+        Args:
+            output_folder: The output folder.
+            resume: Whether to resume training if possible.
+            verbose: Whether to enable verbose logging in the local logger.
+        """
+        super().__init__(output_folder, resume, verbose)
+        
+        del self.local_logger # will create new one
+
+        self.local_logger = MyLocalLogger(verbose)
+    
+    def get_last_x_values(self, key: str, last: Any):
+        """Fetch a logged value from the local logger.
+
+        Args:
+            key: Metric or field name.
+            step: Step index to retrieve, or None to return all values.
+
+        Returns:
+            The logged value or list of values from the local logger.
+        """
+        return self.local_logger.get_last_x_values(key, last)
+
+
 class LocalLogger:
     """
     This class is really trivial. Don't expect cool functionality here. This is my makeshift solution to problems
@@ -231,6 +264,36 @@ class LocalLogger:
 
     def load_checkpoint(self, checkpoint: dict):
         self.my_fantastic_logging = checkpoint
+
+
+class MyLocalLogger(LocalLogger):
+    """
+    Variation that include the patience counter for the early stop strategy.
+    """
+    def __init__(self, verbose: bool = False):
+        super().__init__(verbose)
+
+        self.my_fantastic_logging = {
+            'mean_fg_dice': list(),
+            'ema_fg_dice': list(),
+            'dice_per_class_or_region': list(),
+            'train_losses': list(),
+            'val_losses': list(),
+            'lrs': list(),
+            'epoch_start_timestamps': list(),
+            'epoch_end_timestamps': list(),
+            'patience_waiting': list()
+        }
+    
+    def get_last_x_values(self, key, last):
+        """
+        Get multiple values from the last positions of the logger or all
+        values of the key
+        """
+        if last is not None and len(self.my_fantastic_logging[key]) > last:
+            return self.my_fantastic_logging[key][-last:]  
+        else:
+            return self.my_fantastic_logging[key]
 
 
 class WandbLogger:

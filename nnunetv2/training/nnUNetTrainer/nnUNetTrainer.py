@@ -74,7 +74,7 @@ from nnunetv2.utilities.plans_handling.plans_handler import PlansManager, Config
 
 class nnUNetTrainer(object):
     def __init__(self, plans: dict, configuration: str, fold: int, dataset_json: dict,
-                 device: torch.device = torch.device('cuda')):
+                 device: torch.device = torch.device('cuda'), early_stopping: bool = True):
         # From https://grugbrain.dev/. Worth a read ya big brains ;-)
 
         # apex predator of grug is complexity
@@ -117,7 +117,7 @@ class nnUNetTrainer(object):
             self.my_init_kwargs[k] = locals()[k]
 
         ###  Saving all the init args into class variables for later access
-        continue_training = plans.pop("continue_training")
+        self.continue_training = plans.pop("continue_training")
         logger_config = {"plans": plans, "configuration": configuration, "fold": fold, "dataset": dataset_json}
         self.plans_manager = PlansManager(plans)
         self.configuration_manager = self.plans_manager.get_configuration(configuration)
@@ -150,13 +150,13 @@ class nnUNetTrainer(object):
                 if self.is_cascaded else None
 
         ### Some hyperparameters for you to fiddle with
-        self.initial_lr = 1e-2
-        self.weight_decay = 3e-5
-        self.oversample_foreground_percent = 0.33
-        self.probabilistic_oversampling = False
-        self.num_iterations_per_epoch = 250
-        self.num_val_iterations_per_epoch = 50
-        self.num_epochs = 1000
+        self.initial_lr = self.configuration_manager.initial_lr # 1e-2
+        self.weight_decay = self.configuration_manager.weight_decay # 3e-5
+        self.oversample_foreground_percent = self.configuration_manager.oversample_foreground_percent # 0.33
+        self.probabilistic_oversampling = self.configuration_manager.probabilistic_oversampling # False
+        self.num_iterations_per_epoch = self.configuration_manager.num_iterations_per_epoch # 250
+        self.num_val_iterations_per_epoch = self.configuration_manager.num_val_iterations_per_epoch # 50
+        self.num_epochs = self.configuration_manager.num_epochs # 1000
         self.current_epoch = 0
         self.enable_deep_supervision = True
 
@@ -179,7 +179,7 @@ class nnUNetTrainer(object):
         self.log_file = join(self.output_folder, "training_log_%d_%d_%d_%02.0d_%02.0d_%02.0d.txt" %
                              (timestamp.year, timestamp.month, timestamp.day, timestamp.hour, timestamp.minute,
                               timestamp.second))
-        self.logger = MetaLogger(self.output_folder, continue_training)
+        self.logger = MetaLogger(self.output_folder, self.continue_training)
         self.logger.update_config(logger_config)
 
         ### placeholders
@@ -193,7 +193,7 @@ class nnUNetTrainer(object):
         # self.configure_rotation_dummyDA_mirroring_and_inital_patch_size and will be saved in checkpoints
 
         ### checkpoint saving stuff
-        self.save_every = 50
+        self.save_every = 5
         self.disable_checkpointing = False
 
         self.was_initialized = False
@@ -1129,7 +1129,7 @@ class nnUNetTrainer(object):
             fn_hard = fn_hard[1:]
 
         return {'loss': l.detach().cpu().numpy(), 'tp_hard': tp_hard, 'fp_hard': fp_hard, 'fn_hard': fn_hard}
-
+    
     def on_validation_epoch_end(self, val_outputs: List[dict]):
         outputs_collated = collate_outputs(val_outputs)
         tp = np.sum(outputs_collated['tp_hard'], 0)
