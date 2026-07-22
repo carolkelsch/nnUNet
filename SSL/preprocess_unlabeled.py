@@ -22,7 +22,7 @@ for the unlabeled cases.
 import os
 import argparse
 
-from batchgenerators.utilities.file_and_folder_operations import load_json, join, maybe_mkdir_p
+from batchgenerators.utilities.file_and_folder_operations import load_json, join, maybe_mkdir_p, load_pickle, write_pickle
 
 from nnunetv2.paths import nnUNet_preprocessed, nnUNet_raw
 from nnunetv2.utilities.plans_handling.plans_handler import PlansManager
@@ -79,6 +79,19 @@ def preprocess_unlabeled_cases(
             configuration_manager,
             dataset_json,
         )
+
+        # seg_file=None means has_seg=False during preprocessing, so 'class_locations'
+        # is never added to properties -- but nnUNetDataLoader unconditionally reads
+        # properties['class_locations'] at the call site in generate_train_batch(),
+        # regardless of oversample_foreground_percent. Add an empty placeholder so it
+        # doesn't KeyError. This is safe as long as you keep oversample_foreground_percent=0
+        # for the unlabeled loader (and aren't using an ignore_label) -- the dict's
+        # contents are never actually read in that case, just its presence is checked.
+        pkl_path = output_filename_truncated + ".pkl"
+        properties = load_pickle(pkl_path)
+        properties["class_locations"] = {}
+        write_pickle(properties, pkl_path)
+
         print(f"  preprocessed {case_id}")
 
     print("\nDone.")
