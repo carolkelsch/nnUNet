@@ -74,7 +74,7 @@ from nnunetv2.utilities.plans_handling.plans_handler import PlansManager, Config
 
 class nnUNetTrainer(object):
     def __init__(self, plans: dict, configuration: str, fold: int, dataset_json: dict,
-                 device: torch.device = torch.device('cuda'), early_stopping: bool = True):
+                 device: torch.device = torch.device('cuda')):
         # From https://grugbrain.dev/. Worth a read ya big brains ;-)
 
         # apex predator of grug is complexity
