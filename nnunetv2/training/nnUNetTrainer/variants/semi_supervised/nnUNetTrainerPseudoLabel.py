@@ -168,3 +168,10 @@ class nnUNetTrainerPseudoLabel(nnUNetTrainer):
             'unsup_weight': weight,
             'confident_fraction': confidence_mask.mean().detach().cpu().numpy(),
         }
+
+
+class nnUNetTrainerPseudoLabelLonger(nnUNetTrainerPseudoLabel):
+    # ----------------------- SSL hyperparameters -----------------------
+    rampup_epochs: int = 30                # epochs over which the weight ramps up
+    unlabeled_batch_size = 1
+    # ---------------------------------------------------------------------
