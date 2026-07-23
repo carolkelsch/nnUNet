@@ -189,9 +189,6 @@ def plan_and_preprocess_entry():
                         help="[OPTIONAL] Number of validation iterations per epoch. Default: 50")
     parser.add_argument('-n_epochs', type=int, default=1000, required=False,
                         help="[OPTIONAL] Number of training epochs. Default: 1000")
-    parser.add_argument('--verbose', required=False, action='store_true',
-                        help='Set this to print a lot of stuff. Useful for debugging. Will disable progress bar! '
-                             'Recommended for cluster environments')
 
     _add_logging_args(parser)
     args = parser.parse_args()
